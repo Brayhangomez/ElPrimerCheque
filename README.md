@@ -1,6 +1,6 @@
 # El Primer Cheque (Unity 2D)
 
-Serious game de educación financiera hecho en **Unity 6 (6000.0.56f1, Universal 2D)** para la materia *Desarrollo de Contenidos Digitales y Multimediales* de las Unidades Tecnológicas de Santander, con la Ing. Luz Karime Castellanos Joya.
+Serious game de educación financiera hecho en **Unity 6 (6000.0.56f1, Universal 2D)** para la materia *Desarrollo de Contenidos Digitales y Multimediales* de la Universitaria Tecnológica de Santander, con la Ing. Luz Karime Castellanos Joya.
 
 **Integrantes:** Brayhan Gómez y Camilo Vargas
 
