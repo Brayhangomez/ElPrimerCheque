@@ -1,42 +1,49 @@
-# El Primer Cheque – Previo 2 (Unity 2D)
+# El Primer Cheque (Unity 2D)
 
-Serious game de educación financiera hecho en **Unity 6 (6000.0.56f1, Universal 2D)** para la materia *Desarrollo de Contenidos Digitales y Multimediales* (UTS), con la Ing. Luz Karime Castellanos Joya.
+Serious game de educación financiera hecho en **Unity 6 (6000.0.56f1, Universal 2D)** para la materia *Desarrollo de Contenidos Digitales y Multimediales* de las Unidades Tecnológicas de Santander, con la Ing. Luz Karime Castellanos Joya.
 
 **Integrantes:** Brayhan Gómez y Camilo Vargas
 
 ## De qué trata
 
-Valentina tiene 22 años, se acaba de graduar y recibe su primer sueldo. En este primer capítulo tiene que aprender la regla 50/30/20 y ahorrar 5 monedas para su fondo de emergencia, sin caer en las tentaciones de la tienda ni de la tarjeta de crédito.
+Valentina tiene 22 años, se acaba de graduar y recibe su primer sueldo. En tres capítulos tiene que aprender la regla 50/30/20, diferenciar necesidades de deseos, usar el crédito con cuidado y armar un fondo de emergencia, tomando decisiones con consecuencias.
 
-## Qué tiene este previo
+| Capítulo | Rol | Dificultad |
+|---|---|---|
+| 1. El primer sueldo | Tutorial guiado | 5 monedas, 2 preguntas, sin reloj, intentos y pistas ilimitados |
+| 2. La quincena | Aplicar lo aprendido | 6 monedas, 2 preguntas, 4:00, 3 vidas, 3 pistas (-25 pts) |
+| 3. Fin de mes (reto final) | Integrar y evaluar | 7 monedas, 1 pregunta + reto de 3 preguntas, 2:30, 3 vidas, 1 pista (-50 pts), de noche |
 
-| Requisito | Cómo quedó en el juego |
-|---|---|
-| NPC con diálogo (tecla E) | **Don Rafael**, el arrendador. Explica la regla 50/30/20 y da la misión. Al terminarla tiene un diálogo final distinto. |
-| 2 objetos interactivos | **Vitrina de la tienda** (necesidades vs. deseos) y **cartel del banco** (la tarjeta de crédito es deuda). Muestran "Presiona E" y un panel con texto educativo. |
-| 5 coleccionables | **Monedas de ahorro** repartidas por el barrio. Se recogen una sola vez y desaparecen. |
-| HUD | Contador "Ahorro: x / 5", objetivo actual, mini inventario con íconos y panel de **¡Misión cumplida!** |
+## Momento 3 (Actividades 1 y 2)
+
+- **Audio:** 4 pistas de música (menú, nivel, reto final, créditos) y 11 efectos, todo propio. `AudioManager` persistente con `DontDestroyOnLoad` y `AudioMixer` (grupos Musica y SFX con parámetros expuestos `MusicVol` y `SfxVol`).
+- **Bus de eventos:** `GameEvents` (moneda, acierto, error, diálogo, panel, pista, nivel completado, derrota). El audio, las animaciones y las partículas se enganchan a estos eventos sin depender unos de otros.
+- **Animaciones:** Valentina camina, corre (Shift), interactúa, celebra y se lamenta (triggers en el Animator). Paneles con `UIPop`, partículas con pool (`EffectPool`), luces 2D de noche en el capítulo 3.
+- **Dificultad:** cada capítulo tiene un `LevelConfig` (ScriptableObject) en `Assets/ScriptableObjects/Niveles`.
+- **Retroalimentación:** preguntas de decisión con acierto/error (color + ícono + texto + sonido + animación), barra de progreso, vidas, reloj y puntaje.
+- **Ayudas:** pistas contextuales (tecla H), tutorial del capítulo 1 y mensajes de error que explican el porqué.
+- **Accesibilidad:** texto grande, alto contraste, volumen de música y efectos, silenciar, apagar la vibración de cámara, pausa en cualquier momento y controles por teclado y mouse. Las opciones se guardan con PlayerPrefs.
+- **Optimización:** Sprite Atlas (`Assets/Sprites/Atlas_ElPrimerCheque.spriteatlasv2`), música en Streaming y efectos con Decompress On Load. En el capítulo 3 los batches bajaron de 19 a 13.
 
 ## Controles
 
-- **A / D o flechas:** caminar
-- **E:** hablar / interactuar / pasar el diálogo
-- **Esc:** volver al menú
+- **A / D o flechas:** caminar · **Shift:** correr
+- **E o Espacio:** hablar / interactuar / pasar el diálogo
+- **1, 2, 3 o clic:** responder
+- **H:** pedir una pista
+- **Esc o P:** pausa y opciones
 
-## Scripts (Assets/Scripts)
+## Estructura de scripts (Assets/Scripts)
 
-| Script | Qué hace |
+| Carpeta | Scripts |
 |---|---|
-| `PlayerController.cs` | Movimiento con Rigidbody2D, giro del sprite y parámetro `Speed` del Animator. |
-| `GameInput.cs` | Lee el teclado en un solo lugar y permite bloquear el movimiento durante diálogos. |
-| `NPCDialogue.cs` | Trigger del NPC, aviso de E, diálogo línea por línea con nombre de quien habla y conversación final. |
-| `InteractableObject.cs` | Objetos con aviso "Presiona E" y panel de información educativa. |
-| `CollectibleItem.cs` | Moneda coleccionable (trigger, se cuenta una sola vez y se destruye). |
-| `GameHUDManager.cs` | Contador, objetivo, inventario, panel de misión cumplida y regreso al menú. |
-| `MainMenuManager.cs` | Botones Jugar, Créditos y Salir del menú principal. |
-| `CameraFollow2D.cs` | Cámara que sigue al jugador con zona muerta y límites del nivel. |
-| `SpriteLoop.cs` | Animación simple por cuadros para la moneda y Don Rafael. |
-| `Demo/DemoDirector.cs` | Herramienta que usamos para grabar el video demostrativo (solo se activa desde el menú Taller3 del editor). |
+| `Core` | `GameEvents`, `AudioManager`, `GameSettings`, `SceneMusic` |
+| `Gameplay` | `LevelConfig`, `LevelManager`, `EffectPool` |
+| `UI` | `QuestionPanel`, `FeedbackUI`, `HintSystem`, `TutorialHints`, `PauseMenu`, `OptionsPanel`, `AccessibleText`, `AccessiblePanel`, `UIPop`, `UIButtonSound` |
+| raíz | `PlayerController`, `GameInput`, `NPCDialogue`, `InteractableObject`, `CollectibleItem`, `GameHUDManager`, `MainMenuManager`, `CameraFollow2D`, `SpriteLoop` |
+| `Herramientas` | `CapturaEvidencia` (F12 guarda una captura en el editor) |
+
+Los menús `Taller4` del editor arman las escenas (`1 - Montar Momento 3`), crean el Sprite Atlas (`2 - Optimizar`) y exportan la build de Windows (`3 - Exportar build`).
 
 ## Cómo abrirlo
 
@@ -46,3 +53,5 @@ Valentina tiene 22 años, se acaba de graduar y recibe su primer sueldo. En este
 4. Darle Play.
 
 La build de Windows se entrega aparte en un .zip (abrir `ElPrimerCheque.exe`).
+
+Video del Previo 2: https://youtu.be/9RSO1jVqFNk

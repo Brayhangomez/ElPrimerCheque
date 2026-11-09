@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Capa de entrada del juego: lee el teclado (A/D, flechas, E, Esc) en un solo lugar.
+// Capa de entrada del juego: lee el teclado (A/D, flechas, E o Espacio, Esc) en un solo lugar.
 // También permite bloquear el movimiento mientras hay un diálogo o un panel abierto.
 public static class GameInput
 {
@@ -23,8 +23,8 @@ public static class GameInput
 
     public static float Vertical => MovementLocked ? 0f : Input.GetAxisRaw("Vertical");
 
-    // Tecla E: hablar / interactuar / avanzar diálogo
-    public static bool InteractDown => Input.GetKeyDown(KeyCode.E) || Time.frameCount == simInteractFrame;
+    // Tecla E (o Espacio como alternativa): hablar / interactuar / avanzar diálogo
+    public static bool InteractDown => Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Space) || Time.frameCount == simInteractFrame;
 
     // Tecla Esc: volver al menú principal
     public static bool BackDown => Input.GetKeyDown(KeyCode.Escape) || Time.frameCount == simBackFrame;

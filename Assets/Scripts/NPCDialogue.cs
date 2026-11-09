@@ -16,7 +16,7 @@ public struct DialogueLine
 }
 
 // Sistema de diálogo con NPC (tecla E). Diálogo compartido Jugador <-> NPC.
-// Cuando la misión del HUD está cumplida, el NPC usa la conversación final.
+// Cuando los objetivos del nivel están cumplidos, el NPC usa la conversación final y cierra el capítulo.
 public class NPCDialogue : MonoBehaviour
 {
     [Header("Secuencia de Conversación")]
@@ -24,6 +24,9 @@ public class NPCDialogue : MonoBehaviour
 
     [Header("Conversación al completar la misión (opcional)")]
     [SerializeField] private DialogueLine[] missionCompleteConversation;
+
+    [Header("Conversación mientras faltan objetivos (opcional)")]
+    [SerializeField] private DialogueLine[] reminderConversation;
 
     [Header("Referencias de Interfaz (UI)")]
     [SerializeField] private GameObject dialoguePanel;
@@ -33,6 +36,8 @@ public class NPCDialogue : MonoBehaviour
 
     private bool isPlayerInRange = false;
     private bool isDialogueActive = false;
+    private bool talkedOnce = false;
+    private bool finalActive = false;
     private int currentLineIndex = 0;
     private DialogueLine[] activeConversation;
     private PlayerController player;
@@ -47,6 +52,8 @@ public class NPCDialogue : MonoBehaviour
 
     private void Update()
     {
+        if (PauseMenu.IsPaused) return;
+        if (LevelManager.Instance != null && LevelManager.Instance.Ended) return;
         if (isPlayerInRange && GameInput.InteractDown)
         {
             if (!isDialogueActive) StartDialogue();
@@ -56,14 +63,18 @@ public class NPCDialogue : MonoBehaviour
 
     private void StartDialogue()
     {
-        bool missionDone = GameHUDManager.Instance != null && GameHUDManager.Instance.MissionCompleted;
-        activeConversation = (missionDone && missionCompleteConversation != null && missionCompleteConversation.Length > 0)
-            ? missionCompleteConversation : conversation;
+        var lm = LevelManager.Instance;
+        bool missionDone = lm != null ? lm.MissionReady : (GameHUDManager.Instance != null && GameHUDManager.Instance.MissionCompleted);
+        finalActive = missionDone && missionCompleteConversation != null && missionCompleteConversation.Length > 0;
+        if (finalActive) activeConversation = missionCompleteConversation;
+        else if (talkedOnce && reminderConversation != null && reminderConversation.Length > 0) activeConversation = reminderConversation;
+        else activeConversation = conversation;
         if (activeConversation == null || activeConversation.Length == 0) return;
 
         isDialogueActive = true;
         currentLineIndex = 0;
         GameInput.MovementLocked = true;               // Valentina se queda quieta mientras habla
+        GameEvents.Interact();
         if (player != null) player.FaceTowards(transform.position.x);
         dialoguePanel.SetActive(true);
         if (interactionPrompt != null) interactionPrompt.SetActive(false);
@@ -81,11 +92,12 @@ public class NPCDialogue : MonoBehaviour
     {
         // 1. Nombre de quien habla
         nameText.text = activeConversation[currentLineIndex].speakerName;
-        // 2. Color del nombre (si se definió)
-        if (activeConversation[currentLineIndex].nameColor.a > 0f)
+        // 2. Color del nombre (si se definió; en alto contraste se deja el amarillo de accesibilidad)
+        if (activeConversation[currentLineIndex].nameColor.a > 0f && !GameSettings.HighContrast)
             nameText.color = activeConversation[currentLineIndex].nameColor;
         // 3. Texto de lo que está diciendo
         contentText.text = activeConversation[currentLineIndex].text;
+        GameEvents.DialogueLine();
     }
 
     private void EndDialogue()
@@ -95,6 +107,14 @@ public class NPCDialogue : MonoBehaviour
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
         if (wasActive) GameInput.MovementLocked = false;
         if (interactionPrompt != null) interactionPrompt.SetActive(isPlayerInRange);
+        if (!wasActive) return;
+        if (!talkedOnce)
+        {
+            talkedOnce = true;
+            if (LevelManager.Instance != null) LevelManager.Instance.NotifyTalked();
+        }
+        // la conversación final cierra el capítulo
+        if (finalActive && LevelManager.Instance != null) LevelManager.Instance.CompleteLevel();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -112,7 +132,7 @@ public class NPCDialogue : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             isPlayerInRange = false;
-            EndDialogue();
+            if (isDialogueActive) { finalActive = false; EndDialogue(); }
             if (interactionPrompt != null) interactionPrompt.SetActive(false);
         }
     }

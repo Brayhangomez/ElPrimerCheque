@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 433812eb5be3e9e44bb386c63ac19027, type: 3}
+  m_Name: Nivel3_Config
+  m_EditorClassIdentifier: 
+  levelNumber: 3
+  chapterTitle: "Cap\xEDtulo 3: Fin de mes (reto final)"
+  pedagogicalRole: "Integraci\xF3n y evaluaci\xF3n: tiempo ajustado, 1 pista, reto
+    final de 3 preguntas y puntaje final."
+  nextScene: 
+  music: 3
+  coinsRequired: 7
+  requireFinalTalk: 1
+  timeLimit: 150
+  lives: 3
+  hintsAvailable: 1
+  hintCost: 50
+  wrongAnswerPenalty: 75
+  showInfoBeforeQuestion: 0
+  showTutorial: 0
+  pointsPerCoin: 100
+  pointsCorrectFirstTry: 200
+  pointsCorrectRetry: 100
+  pointsPerSecondLeft: 2

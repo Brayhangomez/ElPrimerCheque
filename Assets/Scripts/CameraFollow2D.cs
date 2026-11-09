@@ -1,6 +1,7 @@
 using UnityEngine;
 
 // Cámara con zona muerta y límites de escenario (clamping).
+// Momento 3: vibración corta para la retroalimentación de error (se puede apagar en Opciones).
 public class CameraFollow2D : MonoBehaviour
 {
     [Header("Objetivo")]
@@ -18,12 +19,22 @@ public class CameraFollow2D : MonoBehaviour
     [SerializeField] private float minX = -5f;
     [SerializeField] private float maxX = 25f;
 
+    private static float shakeTime, shakeStrength;
+    private Vector3 basePos;
+    private bool init;
+
+    public static void Shake(float seconds, float strength)
+    {
+        shakeTime = seconds; shakeStrength = strength;
+    }
+
     private void LateUpdate()
     {
         if (target == null) return;
+        if (!init) { basePos = transform.position; init = true; }
 
-        Vector3 targetPosition = transform.position;
-        float deltaX = target.position.x - transform.position.x;
+        Vector3 targetPosition = basePos;
+        float deltaX = target.position.x - basePos.x;
 
         // Evaluación de la Zona Muerta en el eje X
         if (Mathf.Abs(deltaX) > deadZoneX)
@@ -40,7 +51,15 @@ public class CameraFollow2D : MonoBehaviour
             targetPosition.x = Mathf.Clamp(targetPosition.x, minX, maxX);
         }
 
-        transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+        basePos = Vector3.Lerp(basePos, targetPosition, smoothSpeed * Time.deltaTime);
+
+        Vector3 shake = Vector3.zero;
+        if (shakeTime > 0f)
+        {
+            shakeTime -= Time.unscaledDeltaTime;
+            shake = (Vector3)(Random.insideUnitCircle * shakeStrength);
+        }
+        transform.position = basePos + shake;
     }
 
     private void OnDrawGizmosSelected()
